@@ -1,0 +1,38 @@
+{
+  "name": "ts-bitcoin",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A simple Typescript implementation of BitCoin v0.1.5 ALPHA.",
+  "scripts": {
+    "prepare": "husky install",
+    "commit": "git add --all && cz && git push",
+    "changelog": "npx ts-node scripts/changelog.ts"
+  },
+  "devDependencies": {
+    "@types/conventional-changelog-core": "^4.2.1",
+    "@types/node": "^16.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "commitizen": "^4.2.4",
+    "commitlint": "^15.0.0",
+    "conventional-changelog": "^3.1.24",
+    "cz-customizable": "^6.3.0",
+    "eslint": "^8.4.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.2"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "npx eslint --fix",
+    "*.{js,ts,md,json}": "npx prettier --write"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-customizable"
+    }
+  }
+}
