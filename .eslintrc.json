@@ -1,13 +1,12 @@
 {
   "env": {
     "node": true,
-    "browser": true,
-    "es2021": true
+    "browser": true
   },
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2021,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint", "simple-import-sort"],
@@ -17,6 +16,7 @@
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "no-unused-vars": ["off", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-unused-vars": ["off", { "argsIgnorePattern": "^_" }]
   }

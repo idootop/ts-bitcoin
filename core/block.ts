@@ -1,12 +1,12 @@
 import { Transaction } from './transaction';
-import { now } from './utils';
+import { Hash, hashObj, now, printf } from './utils';
 
 export class Block {
   constructor(
     /**
      * 上一区块的hash
      */
-    public preHash: string = '',
+    public preHash: Hash = '',
     /**
      * 创建时间戳
      */
@@ -28,8 +28,7 @@ export class Block {
   /**
    * 区块 hash
    */
-  get hash(): string {
-    // todo
-    return '';
+  get hash() {
+    return hashObj(this);
   }
 }

@@ -1,6 +1,7 @@
 export * from './array';
 export * from './encode';
 export * from './function';
+export * from './git';
 export * from './io';
 export * from './number';
 export * from './object';

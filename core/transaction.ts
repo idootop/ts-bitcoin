@@ -1,4 +1,5 @@
-import { Block } from './block';
+import { kCoinbaseUnlockScript } from './config';
+import { hashObj, HashUTXO } from './utils';
 
 export class Transaction {
   constructor(
@@ -15,12 +16,38 @@ export class Transaction {
      */
     public outputs: Output[] = [],
   ) {}
+
+  /**
+   * 创建 coinbase 交易
+   * @param reward 奖励，单位：cent
+   * @param fees 手续费，单位：cent
+   * @param lockScript 锁定脚本（矿工公钥）
+   * @returns
+   */
+  static coinbase(reward: bigint, fees: bigint, lockScript: string) {
+    return new Transaction(
+      [new Input(kCoinbaseUnlockScript)],
+      [new Output(reward + fees, lockScript)],
+    );
+  }
+
   /**
    * 交易的校验hash
    */
-  get hash(): string {
-    // todo
-    return '';
+  get hash() {
+    return hashObj(this);
+  }
+
+  /**
+   * 是否为coinbase交易
+   */
+  get isCoinbase() {
+    return (
+      this.inputs.length === 1 &&
+      this.outputs.length === 1 &&
+      this.inputs[0].reference === undefined &&
+      this.inputs[0].unlockScript === kCoinbaseUnlockScript
+    );
   }
 }
 
@@ -43,13 +70,19 @@ export class Input {
       /**
        * 这笔UTXO所在交易的hash
        */
-      transaction: string;
+      transactionHash: string;
       /**
        * 这笔UTXO在所在交易的 outputs 中的索引
        */
       outputIndex: number;
     },
   ) {}
+
+  get hashUTXO(): HashUTXO {
+    return this.reference === undefined
+      ? 'coinbase_404'
+      : `${this.reference.transactionHash}_${this.reference.outputIndex}`;
+  }
 }
 
 export class Output {
@@ -59,42 +92,12 @@ export class Output {
      *
      * 单位：cent
      */
-    public amount: bigint = 0n,
+    public value: bigint = 0n,
     /**
      * 锁定脚本，用于验证谁有权利来花费这笔UTXO
      *
      * 通常为接收方账户地址或公钥
      */
     public lockScript: string = '',
-  ) {}
-}
-
-export class UTXO {
-  constructor(
-    /**
-     * 价值
-     *
-     * 单位：cent
-     */
-    public amount: bigint = 0n,
-    /**
-     * 这笔UTXO的来源
-     *
-     * 注意：每个 block 的第一笔交易为奖励给矿工的新币，称为 coinbase
-     */
-    public reference: {
-      /**
-       * 所在区块
-       */
-      block: Block;
-      /**
-       * 所在交易
-       */
-      transaction: Transaction;
-      /**
-       * 这笔UTXO在所在交易的 outputs 中的索引
-       */
-      outputIndex: number;
-    },
   ) {}
 }
