@@ -32,3 +32,14 @@ export class Block {
     return hashObj(this);
   }
 }
+
+export abstract class BlockManager {
+  /**
+   * 添加已确认区块
+   */
+  abstract onAddBlocks(blocks: Block[]): void;
+  /**
+   * 移除无效区块
+   */
+  abstract onRemoveBlocks(blocks: Block[]): void;
+}

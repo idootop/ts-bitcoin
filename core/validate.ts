@@ -1,5 +1,5 @@
 import { Block } from './block';
-import { BlockChain, blockChain } from './blockchain';
+import { blockChain } from './blockchain';
 import { kCoinbaseReward, kMinFeesPerTransaction } from './config';
 import { Input, Transaction } from './transaction';
 import { verifySignature } from './utils';
@@ -29,7 +29,7 @@ export const validateTransaction = (transaction: Transaction): TransactionType =
   let outputTotal = 0n;
 
   for (const input of transaction.inputs) {
-    const utxo = blockChain.getUTXO(input.hashUTXO);
+    const utxo = blockChain.utxoManager.getUTXO(input.hashUTXO);
     if (utxo === undefined) {
       // 找不到引用，可能为孤儿交易
       return 'orphan';
@@ -85,7 +85,7 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
       const transactionHash = transaction.hash;
       return { ...transactions, transactionHash: transaction };
     },
-    { ...blockChain.confirmedTransactions },
+    { ...blockChain.confirmedDataManager.confirmedTransactions },
   );
 
   const allInputs = transactions.reduce((inputs, transaction) => {
@@ -97,7 +97,7 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
       transaction.outputs;
       return { ...utxos, transactionHash: transaction };
     },
-    { ...blockChain.UTXOs },
+    { ...blockChain.utxoManager.UTXOs },
   );
 
   let feesTotal = 0n;
@@ -183,6 +183,6 @@ export const validateBlock = (block: Block) => {
 /**
  * 区块是否满足 PoW（工作量证明）
  */
-const validatePoW = (block: Block) => {
+export const validatePoW = (block: Block) => {
   return block.hash.startsWith(''.padEnd(block.difficulty, '0'));
 };

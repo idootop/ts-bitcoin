@@ -1,17 +1,11 @@
 import { Block } from './block';
-import { kGenesisBlock, kGenesisBlockHash, kGenesisTransaction } from './config';
-import { Output, Transaction } from './transaction';
-import { Hash, HashUTXO } from './utils';
+import { ConfirmedDataManager, TransactionPoolManager, UTXOManager } from './managers';
+import { Hash } from './utils';
 
 // todo 在接收新的交易与区块前，先从附近节点同步主链数据
 export class BlockChain {
   constructor() {
-    // 初始化主链区块与交易
-    this.chain = [kGenesisBlockHash];
-    this.confirmedBlocks = {
-      genesisBlockHash: kGenesisBlock,
-    };
-    this.confirmedTransactions = { genesisTransactionHash: kGenesisTransaction };
+    // todo 初始化主链区块与交易 addGenesisBlock
   }
 
   /**
@@ -22,19 +16,23 @@ export class BlockChain {
   chain: Hash[] = [];
 
   /**
-   * 当前链上验证有效的区块
+   * 交易池管理者
+   *
+   * 孤儿交易 + 合法交易
    */
-  confirmedBlocks: Record<Hash, Block> = {};
+  transactionPoolManager: TransactionPoolManager = new TransactionPoolManager();
 
   /**
-   * 当前链上验证有效的交易
+   * UTXO(未花费交易输出)管理者
    */
-  confirmedTransactions: Record<Hash, Transaction> = {};
+  utxoManager: UTXOManager = new UTXOManager();
 
   /**
-   * 未花费交易输出
+   * 链上已确认数据管理者
+   *
+   * 当前链上已确认的区块 + 交易
    */
-  UTXOs: Record<HashUTXO, Output> = {};
+  confirmedDataManager: ConfirmedDataManager = new ConfirmedDataManager();
 
   /**
    * 当前区块链高度
@@ -48,7 +46,7 @@ export class BlockChain {
    */
   get lastBlock() {
     const lastBlockHash = this.chain[this.chain.length - 1];
-    return this.confirmedBlocks[lastBlockHash];
+    return this.confirmedDataManager.getBlock(lastBlockHash);
   }
 
   /**
@@ -77,13 +75,6 @@ export class BlockChain {
   removeBlocks(blockHash: Hash) {
     // todo 移除旧区块、交易
     // todo 更新UTXO
-  }
-
-  /**
-   * 查询有效的UTXO
-   */
-  getUTXO(hashUTXO: HashUTXO): Output | undefined {
-    return this.UTXOs[hashUTXO];
   }
 }
 
