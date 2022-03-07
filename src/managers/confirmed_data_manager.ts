@@ -1,7 +1,8 @@
 import { Block } from '../block';
 import { BlockManager } from '../block';
+import { blockChain } from '../blockchain';
 import { Transaction } from '../transaction';
-import { Hash } from '../utils';
+import { Hash, removeWhere } from '../utils';
 
 export class ConfirmedDataManager extends BlockManager {
   /**
@@ -24,14 +25,20 @@ export class ConfirmedDataManager extends BlockManager {
   /**
    * todo 当链上添加区块
    */
-  onAddBlocks(blocks: Block[]): void {
+  addBlock(block: Block): void {
+    // 同时更新 blockchain.chain 中的 hash
+    blockChain.chain.push(block.hash);
+    // todo
     throw new Error('Method not implemented.');
   }
 
   /**
    * todo 当链上移除区块
    */
-  onRemoveBlocks(blocks: Block[]): void {
+  removeBlock(block: Block): void {
+    // 同时更新 blockchain.chain 中的 hash
+    removeWhere(blockChain.chain, (hash) => hash === block.hash);
+    // todo
     throw new Error('Method not implemented.');
   }
 }

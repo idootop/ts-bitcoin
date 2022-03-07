@@ -1,6 +1,11 @@
 import { Block } from './block';
 import { blockChain } from './blockchain';
-import { kCoinbaseReward, kMinFeesPerTransaction } from './config';
+import {
+  kCoinbaseReward,
+  kGenesisBlock,
+  kMaxTransactionsPerBlock,
+  kMinFeesPerTransaction,
+} from './config';
 import { Input, Transaction } from './transaction';
 import { verifySignature } from './utils';
 
@@ -77,6 +82,11 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
   const [coinbase, ...transactions] = originTransactions;
   if (!coinbase.isCoinbase) {
     // 首笔交易必须为 coinbase
+    return false;
+  }
+
+  if (transactions.length > kMaxTransactionsPerBlock) {
+    // 单个区块中的交易笔数不能超过 kMaxTransactionsPerBlock
     return false;
   }
 
@@ -161,6 +171,9 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
  * 3. 区块所有交易有效
  */
 export const validateBlock = (block: Block) => {
+  // 创世区块
+  if (block === kGenesisBlock) return true;
+
   const chain = blockChain.chain;
   if (chain.length > 1 && !chain.slice(-2, chain.length - 1).includes(block.preHash)) {
     // 区块的 preHash 必须为主链上的倒数第一或倒数第二个区块（产生分岔点）的 hash
@@ -185,4 +198,16 @@ export const validateBlock = (block: Block) => {
  */
 export const validatePoW = (block: Block) => {
   return block.hash.startsWith(''.padEnd(block.difficulty, '0'));
+};
+
+/**
+ * 区块是连续的
+ */
+export const validateContinuousBlocks = (blocks: Block[]) => {
+  if (blocks.length < 2) return true;
+  for (let i = 1; i < blocks.length; i++) {
+    if (blocks[i].preHash !== blocks[i - 1].hash) {
+      return false;
+    }
+  }
 };

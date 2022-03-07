@@ -18,7 +18,7 @@ export class Wallet {
     const isMineUTXO = (utxo: Output) => publicKey === utxo.lockScript;
     let balance = 0n;
     // 遍历当前区块链上有效的UTXOs
-    for (const [_, utxo] of Object.entries(blockChain.UTXOs)) {
+    for (const [_, utxo] of Object.entries(blockChain.utxoManager.UTXOs)) {
       if (isMineUTXO(utxo)) {
         balance += utxo.value;
       }

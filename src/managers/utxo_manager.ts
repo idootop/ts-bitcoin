@@ -19,14 +19,14 @@ export class UTXOManager extends BlockManager {
   /**
    * todo 当链上添加区块
    */
-  onAddBlocks(blocks: Block[]): void {
+  addBlock(block: Block): void {
     throw new Error('Method not implemented.');
   }
 
   /**
    * todo 当链上移除区块
    */
-  onRemoveBlocks(blocks: Block[]): void {
+  removeBlock(block: Block): void {
     throw new Error('Method not implemented.');
   }
 }

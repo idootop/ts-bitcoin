@@ -26,7 +26,7 @@ export const kCoinbaseReward = 100n * kCentsPerCoin;
 export const kCoinbaseUnlockScript = 'coinbase';
 
 /**
- * 每个区块的交易笔数上限（100笔）
+ * 每个区块的交易笔数上限（100笔，不包含 coinbase 交易）
  */
 export const kMaxTransactionsPerBlock = 100;
 
@@ -41,6 +41,3 @@ export const kMinFeesPerTransaction = 1;
 export const kGenesisBlock = new Block('genesis', 1646462674470, 0, 404, [
   Transaction.coinbase(kCoinbaseReward, 0n, 'A love that never dies.'),
 ]);
-export const kGenesisBlockHash = kGenesisBlock.hash;
-export const kGenesisTransaction = kGenesisBlock.transactions[0];
-export const kGenesisTransactionHash = kGenesisTransaction.hash;

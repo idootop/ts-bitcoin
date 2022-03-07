@@ -37,9 +37,9 @@ export abstract class BlockManager {
   /**
    * 添加已确认区块
    */
-  abstract onAddBlocks(blocks: Block[]): void;
+  abstract addBlock(block: Block): void;
   /**
    * 移除无效区块
    */
-  abstract onRemoveBlocks(blocks: Block[]): void;
+  abstract removeBlock(block: Block): void;
 }
