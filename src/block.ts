@@ -17,10 +17,6 @@ export class Block {
      */
     public timestamp: number = now(),
     /**
-     * PoW（工作量证明）难度
-     */
-    public difficulty: number = 0,
-    /**
      * 随机数
      */
     public nonce: number = 0,

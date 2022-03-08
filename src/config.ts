@@ -43,6 +43,6 @@ export const kDifficultySteps = 10000;
 /**
  * 创世区块
  */
-export const kGenesisBlock = new Block('genesis', 1646462674470, 0, 404, [
+export const kGenesisBlock = new Block('genesis', 1646462674470, 404, [
   Transaction.coinbase(kCoinbaseReward, 0n, 'A love that never dies.'),
 ]);
