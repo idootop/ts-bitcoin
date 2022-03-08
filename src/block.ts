@@ -1,6 +1,6 @@
 import { kDifficultySteps } from './config';
 import { Transaction } from './transaction';
-import { Hash, hashObj, now, printf } from './utils';
+import { Hash, hashObj, now } from './utils';
 
 export class Block {
   static calcDifficulty(height: number): number {
