@@ -166,21 +166,22 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
 /**
  * 校验区块是否有效
  *
- * 1. preHash 为区块链最后一个或倒数第二个区块 hash
+ * 1. preHash 为区块链最后一个区块的 hash （创世区块除外）
  * 2. 区块 hash 满足 PoW （工作量证明）
  * 3. 区块所有交易有效
  */
-export const validateBlock = (block: Block) => {
+export const validateBlock = (block: Block, height: number) => {
   // 创世区块
-  if (block === kGenesisBlock) return true;
+  if (blockChain.height === 0 && block === kGenesisBlock) {
+    return true;
+  }
 
-  const chain = blockChain.chain;
-  if (chain.length > 1 && !chain.slice(-2, chain.length - 1).includes(block.preHash)) {
-    // 区块的 preHash 必须为主链上的倒数第一或倒数第二个区块（产生分岔点）的 hash
+  if (blockChain.lastBlock!.hash !== block.preHash) {
+    // 区块的 preHash 必须为主链上最后一个区块的 hash
     return false;
   }
 
-  if (!validatePoW(block)) {
+  if (!validatePoW(block, height)) {
     // 必须满足工作量证明
     return false;
   }
@@ -196,8 +197,18 @@ export const validateBlock = (block: Block) => {
 /**
  * 区块是否满足 PoW（工作量证明）
  */
-export const validatePoW = (block: Block) => {
-  return block.hash.startsWith(''.padEnd(block.difficulty, '0'));
+export const validatePoW = (block: Block, height: number) => {
+  return (
+    validateDifficulty(block, height) && // 难度有效
+    block.hash.startsWith(''.padEnd(block.difficulty, '0')) // hash 有效
+  );
+};
+
+/**
+ * 区块工作量证明难度是否有效
+ */
+export const validateDifficulty = (block: Block, height: number) => {
+  return block.difficulty === Block.calcDifficulty(height);
 };
 
 /**

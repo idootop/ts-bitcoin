@@ -1,7 +1,12 @@
+import { kDifficultySteps } from './config';
 import { Transaction } from './transaction';
 import { Hash, hashObj, now, printf } from './utils';
 
 export class Block {
+  static calcDifficulty(height: number): number {
+    // 每 kDifficultySteps 个区块，难度 +1
+    return Math.floor((height - 1) / kDifficultySteps);
+  }
   constructor(
     /**
      * 上一区块的hash

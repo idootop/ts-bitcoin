@@ -2,13 +2,14 @@ import { Block } from './block';
 import { kGenesisBlock } from './config';
 import { ConfirmedDataManager, TransactionPoolManager, UTXOManager } from './managers';
 import { Hash } from './utils';
-import { validateBlock, validateContinuousBlocks } from './validate';
+import { validateBlock, validateContinuousBlocks, validatePoW } from './validate';
 
-// todo 在接收新的交易与区块前，先从附近节点同步主链数据
 export class BlockChain {
   constructor() {
-    // todo 初始化主链区块与交易 addGenesisBlock
+    // 初始化区块链状态
+    // todo 数据本地持久化
     this.addBlocksIfValid([kGenesisBlock]);
+    // todo 在接收新的交易与区块前，先从附近节点同步主链数据
   }
 
   /**
@@ -55,8 +56,6 @@ export class BlockChain {
   /**
    * 添加合法区块
    *
-   * blocks 应该在当前 chain 后连续
-   *
    * 通常用于添加新加区块，或同步不同节点之间的主链数据
    *
    * 同步主链区块数据的流程为：
@@ -66,18 +65,62 @@ export class BlockChain {
    * 3. 同步在最长链上最近的公共节点之后的所有区块（先移除旧块，再添加新块）
    */
   addBlocksIfValid(blocks: Block[]) {
-    if (
-      this.lastBlock !== undefined && // 不是创始区块
-      !validateContinuousBlocks([this.lastBlock, ...blocks])
-    ) {
-      // 在当前 chain 后不连续
+    if (blocks.length < 1) return;
+    if (!validateContinuousBlocks(blocks)) {
+      // 区块不连续
       return;
     }
 
-    // todo 如果产生分歧点？先移除顶部区块，然后更新新区块。考虑单个新区块和多个新区块情况。
+    const chain = blockChain.chain;
+    const preHash = blocks[0].preHash;
+    const preBlockIndex = chain.indexOf(preHash);
+    if (preBlockIndex < 0) {
+      // 未找到新区块的 preBlock，丢掉更新
+      return;
+    }
 
-    for (const block of blocks) {
-      if (!validateBlock(block)) {
+    if (blocks.some((block, idx) => !validatePoW(block, idx + 1 + preBlockIndex + 1))) {
+      // 区块不满足 PoW（工作量证明）
+      // 可能为某些篡改的非法的区块数据，直接丢掉更新
+      return;
+    }
+
+    // 如果产生旧的分岔点 (公共区块之后多于1个区块)
+    // 通常出现在有节点在离线挖矿，节点重新连接网络后，数据较旧出现冲突
+    if (chain.length - 1 - preBlockIndex > 1) {
+      const incomingBlocks = blocks.length;
+      const mineBlocks = chain.length - 1 - preBlockIndex;
+      if (incomingBlocks > mineBlocks) {
+        // 同步过来的区块长度更长，我的区块无效（我可能在离线挖矿）
+        // 同步区块
+        this.removeBlocks(chain[preBlockIndex + 1]);
+      } else {
+        // 我的区块长度更长，对方区块无效（对方可能在离线挖矿）
+        // 丢掉更新
+        return;
+      }
+    } else if (chain.length > 1 && chain[chain.length - 2] === preHash) {
+      // 如果产生新的分岔点 (区块的 preHash 为主链上的倒数第二个区块的 hash)
+      if (blocks.length === 1) {
+        // 同步单个区块
+        // 当新区块 nonce 值大于当前最后一个区块时，新区块有效，丢掉旧区块
+        if (blocks[0].nonce > blockChain.lastBlock!.nonce) {
+          // 新的区块有效，替换掉当前最后一个区块
+          this.removeBlocks(chain[chain.length - 1]);
+        } else {
+          // 新的区块无效，丢掉更新
+          return;
+        }
+      } else {
+        // 同步多个区块
+        // 我们总是以最长链的数据为准，故完全同步（信任）新区块
+        this.removeBlocks(chain[chain.length - 1]);
+      }
+    }
+
+    for (let idx = 0; idx < blocks.length; idx++) {
+      const block = blocks[idx];
+      if (!validateBlock(block, idx + 1 + preBlockIndex + 1)) {
         // 遇到无效区块，终止添加后续区块
         return;
       }

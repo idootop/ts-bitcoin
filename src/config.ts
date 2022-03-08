@@ -36,6 +36,11 @@ export const kMaxTransactionsPerBlock = 100;
 export const kMinFeesPerTransaction = 1;
 
 /**
+ * PoW（工作量证明）难度增加步长
+ */
+export const kDifficultySteps = 10000;
+
+/**
  * 创世区块
  */
 export const kGenesisBlock = new Block('genesis', 1646462674470, 0, 404, [
