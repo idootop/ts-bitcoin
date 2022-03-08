@@ -9,7 +9,7 @@ exports.rules = {
   'type-enum': [Error, 'always', types_2.types],
   'body-leading-blank': [Error, 'always'],
   'footer-leading-blank': [Error, 'always'],
-  'header-max-length': [Error, 'always', 72],
+  'header-max-length': [Error, 'always', 100],
   'scope-case': [Error, 'always', 'camel-case'],
   'subject-empty': [Error, 'never'],
   'subject-full-stop': [Error, 'never', '。'],

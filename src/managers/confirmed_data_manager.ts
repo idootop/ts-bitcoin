@@ -23,22 +23,30 @@ export class ConfirmedDataManager extends BlockManager {
   }
 
   /**
-   * todo 当链上添加区块
+   * 当链上添加区块
    */
   addBlock(block: Block): void {
-    // 同时更新 blockchain.chain 中的 hash
+    // 更新 blockchain.chain 中的 hash
     blockChain.chain.push(block.hash);
-    // todo
-    throw new Error('Method not implemented.');
+    // 添加区块
+    this.confirmedBlocks[block.hash] = block;
+    // 添加交易
+    block.transactions.forEach((transaction) => {
+      this.confirmedTransactions[transaction.hash] = transaction;
+    });
   }
 
   /**
-   * todo 当链上移除区块
+   * 当链上移除区块
    */
   removeBlock(block: Block): void {
-    // 同时更新 blockchain.chain 中的 hash
+    // 更新 blockchain.chain 中的 hash
     removeWhere(blockChain.chain, (hash) => hash === block.hash);
-    // todo
-    throw new Error('Method not implemented.');
+    // 移除区块
+    delete this.confirmedBlocks[block.hash];
+    // 移除交易
+    block.transactions.forEach((transaction) => {
+      delete this.confirmedTransactions[transaction.hash];
+    });
   }
 }
