@@ -189,17 +189,8 @@ export const validateBlock = (block: Block, height: number) => {
  * 区块是否满足 PoW（工作量证明）
  */
 export const validatePoW = (block: Block, height: number) => {
-  return (
-    validateDifficulty(block, height) && // 难度有效
-    block.hash.startsWith(''.padEnd(block.difficulty, '0')) // hash 有效
-  );
-};
-
-/**
- * 区块工作量证明难度是否有效
- */
-export const validateDifficulty = (block: Block, height: number) => {
-  return block.difficulty === Block.calcDifficulty(height);
+  const difficulty = Block.calcDifficulty(height);
+  return block.hash.startsWith(''.padEnd(difficulty, '0'));
 };
 
 /**

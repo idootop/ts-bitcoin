@@ -1,6 +1,6 @@
 import { kDifficultySteps } from './config';
 import { Transaction } from './transaction';
-import { Hash, hashObj, now, printf } from './utils';
+import { Hash, hashObj, now } from './utils';
 
 export class Block {
   static calcDifficulty(height: number): number {
@@ -16,10 +16,6 @@ export class Block {
      * 创建时间戳
      */
     public timestamp: number = now(),
-    /**
-     * PoW（工作量证明）难度
-     */
-    public difficulty: number = 0,
     /**
      * 随机数
      */
