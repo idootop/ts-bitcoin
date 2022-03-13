@@ -3,10 +3,6 @@ import { Transaction } from './transaction';
 import { Hash, hashObj, now } from './utils';
 
 export class Block {
-  static calcDifficulty(height: number): number {
-    // 每 kDifficultySteps 个区块，难度 +1
-    return Math.floor((height - 1) / kDifficultySteps);
-  }
   constructor(
     /**
      * 上一区块的hash
@@ -44,3 +40,11 @@ export abstract class BlockManager {
    */
   abstract removeBlock(block: Block): void;
 }
+
+/**
+ * 计算区块难度值
+ */
+export const calcBlockDifficulty = (height: number) => {
+  // 每 kDifficultySteps 个区块，难度 +1
+  return Math.floor((height - 1) / kDifficultySteps);
+};

@@ -1,4 +1,4 @@
-import { Block } from './block';
+import { Block, calcBlockDifficulty } from './block';
 import { blockChain } from './blockchain';
 import {
   kCoinbaseReward,
@@ -189,7 +189,7 @@ export const validateBlock = (block: Block, height: number) => {
  * 区块是否满足 PoW（工作量证明）
  */
 export const validatePoW = (block: Block, height: number) => {
-  const difficulty = Block.calcDifficulty(height);
+  const difficulty = calcBlockDifficulty(height);
   return block.hash.startsWith(''.padEnd(difficulty, '0'));
 };
 
