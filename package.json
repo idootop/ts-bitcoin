@@ -1,8 +1,8 @@
 {
-  "name": "ts-bitcoin",
+  "name": "ts-coin",
   "version": "0.0.1",
   "private": true,
-  "description": "A simple Typescript implementation of BitCoin v0.1.5 ALPHA.",
+  "description": "A simple Typescript implementation of Blockchain.",
   "scripts": {
     "prepare": "husky install",
     "commit": "git add --all && cz && git push",
