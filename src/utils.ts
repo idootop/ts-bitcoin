@@ -86,3 +86,5 @@ export const verifySignature = (publicKey: string, signature: string) => {
   const verify = crypto.createVerify('RSA-SHA256');
   return verify.verify(publicKey, Buffer.from(signature, 'hex'));
 };
+
+export const deepClone = (data: any) => JSON.parse(JSON.stringify(data));

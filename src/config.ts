@@ -46,3 +46,8 @@ export const kDifficultySteps = 10000;
 export const kGenesisBlock = new Block('genesis', 1646462674470, 0, 404, [
   Transaction.coinbase(kCoinbaseReward, 0n, 'A love that never dies.'),
 ]);
+
+/**
+ * coinbase 交易输入 hash
+ */
+export const kCoinbaseInputHash = 'coinbase';

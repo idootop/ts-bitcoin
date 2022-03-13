@@ -23,6 +23,13 @@ export class ConfirmedDataManager extends BlockManager {
   }
 
   /**
+   * 获取已确认交易
+   */
+  getTransaction(transactionHash: Hash): Transaction | undefined {
+    return this.confirmedTransactions[transactionHash];
+  }
+
+  /**
    * 当链上添加区块
    */
   addBlock(block: Block): void {

@@ -1,6 +1,8 @@
 import { Block } from '../block';
 import { BlockManager } from '../block';
-import { Output } from '../transaction';
+import { blockChain } from '../blockchain';
+import { kCoinbaseInputHash } from '../config';
+import { Output, Transaction } from '../transaction';
 import { HashUTXO } from '../utils';
 
 export class UTXOManager extends BlockManager {
@@ -17,16 +19,43 @@ export class UTXOManager extends BlockManager {
   }
 
   /**
-   * todo 当链上添加区块
+   * 当链上添加区块
    */
   addBlock(block: Block): void {
-    throw new Error('Method not implemented.');
+    // 正向添加交易
+    for (const transaction of block.transactions) {
+      // 从 UTXO 中移除当前交易中的 input
+      transaction.inputs.forEach((input) => {
+        if (input.hashUTXO === kCoinbaseInputHash) return;
+        delete this.UTXOs[input.hashUTXO];
+      });
+      // 添加新的 UTXO
+      transaction.outputs.forEach((output, outputIndex) => {
+        const hashUTXO: HashUTXO = `${transaction.hash}_${outputIndex}`;
+        this.UTXOs[hashUTXO] = output;
+      });
+    }
   }
 
   /**
-   * todo 当链上移除区块
+   * 当链上移除区块
    */
   removeBlock(block: Block): void {
-    throw new Error('Method not implemented.');
+    // 反向移除交易
+    for (const transaction of block.transactions.reverse()) {
+      // 恢复输入为UTXO
+      transaction.inputs.forEach((input) => {
+        if (input.hashUTXO === kCoinbaseInputHash) return;
+        const { transactionHash, outputIndex } = input.reference!;
+        const tx = blockChain.confirmedDataManager.getTransaction(transactionHash)!;
+        const output = tx.getOutput(outputIndex);
+        this.UTXOs[input.hashUTXO] = output;
+      });
+      // 从 UTXO 中移除当前交易中的 output
+      transaction.outputs.forEach((output, outputIndex) => {
+        const hashUTXO: HashUTXO = `${transaction.hash}_${outputIndex}`;
+        delete this.UTXOs[hashUTXO];
+      });
+    }
   }
 }

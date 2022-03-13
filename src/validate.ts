@@ -7,7 +7,7 @@ import {
   kMinFeesPerTransaction,
 } from './config';
 import { Input, Transaction } from './transaction';
-import { verifySignature } from './utils';
+import { deepClone, HashUTXO, verifySignature } from './utils';
 
 type TransactionType = 'valid' | 'invalid' | 'orphan';
 
@@ -72,7 +72,7 @@ export const validateTransaction = (transaction: Transaction): TransactionType =
  * 1. 每笔交易（除coinbase）的输入都能正常解锁对应输出
  * 2. 每笔交易（除coinbase）的输入 - 输出 = 手续费 >= 最低手续费
  * 3. coinbase 奖励 coin 与手续费有效
- * 4. 合并区块中存在相互引用的交易（除coinbase），合并后的所有交易输入对应的UTXO有效
+ * 4. 同一区块中可能存在相互引用的交易（除coinbase），所有交易输入对应的UTXO有效
  */
 export const validateBlockTransactions = (originTransactions: Transaction[]) => {
   if (originTransactions.length < 1) {
@@ -90,51 +90,34 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
     return false;
   }
 
-  const tempConfirmedTransactions = transactions.reduce(
-    (transactions, transaction) => {
-      const transactionHash = transaction.hash;
-      return { ...transactions, transactionHash: transaction };
-    },
-    { ...blockChain.confirmedDataManager.confirmedTransactions },
-  );
-
-  const allInputs = transactions.reduce((inputs, transaction) => {
-    return [...inputs, ...transaction.inputs];
-  }, [] as Input[]);
-
-  const tempUTXOs = transactions.reduce(
-    (utxos, transaction) => {
-      transaction.outputs;
-      return { ...utxos, transactionHash: transaction };
-    },
-    { ...blockChain.utxoManager.UTXOs },
-  );
+  const tempUTXOs = deepClone(blockChain.utxoManager.UTXOs);
+  coinbase.outputs.forEach((output, outputIndex) => {
+    const hashUTXO: HashUTXO = `${coinbase.hash}_${outputIndex}`;
+    tempUTXOs[hashUTXO] = output;
+  });
 
   let feesTotal = 0n;
   for (const transaction of transactions) {
     let inputTotal = 0n;
     let outputTotal = 0n;
+    // 输入
     for (const input of transaction.inputs) {
-      const reference = input.reference!;
-      const preTransaction = tempConfirmedTransactions[reference.transactionHash];
-      if (preTransaction === undefined) {
-        // 找不到引用的交易
-        return false;
+      const utxo = tempUTXOs[input.hashUTXO];
+      if (utxo === undefined) {
+        // 找不到引用的 UTXO
+        return;
       }
-      if (reference.outputIndex > preTransaction.outputs.length - 1) {
-        // 数组越界，无效的输出引用
-        return false;
-      }
-      const output = preTransaction.outputs[reference.outputIndex];
-      const publicKey = output.lockScript;
+
+      const publicKey = utxo.lockScript;
       const signature = input.unlockScript;
       // 无效的签名
       if (!verifySignature(publicKey, signature)) {
         return false;
       }
-      inputTotal += output.value;
-    }
 
+      inputTotal += utxo.value;
+    }
+    // 输出
     for (const output of transaction.outputs) {
       outputTotal += output.value;
     }
@@ -151,14 +134,22 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
     }
 
     feesTotal += fees;
+
+    // 从 UTXO 中移除当前交易中的 input
+    transaction.inputs.forEach((input) => {
+      delete tempUTXOs[input.hashUTXO];
+    });
+    // 添加新的 UTXO
+    transaction.outputs.forEach((output, outputIndex) => {
+      const hashUTXO: HashUTXO = `${transaction.hash}_${outputIndex}`;
+      tempUTXOs[hashUTXO] = output;
+    });
   }
 
   if (coinbase.outputs[0].value > feesTotal + kCoinbaseReward) {
     // coinbase 的输出值不能大于奖励 + 手续费
     return false;
   }
-
-  // todo 输入为有效的UTXO
 
   return true;
 };

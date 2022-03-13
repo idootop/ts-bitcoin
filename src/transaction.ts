@@ -1,4 +1,4 @@
-import { kCoinbaseUnlockScript } from './config';
+import { kCoinbaseInputHash, kCoinbaseUnlockScript } from './config';
 import { hashObj, HashUTXO } from './utils';
 
 export class Transaction {
@@ -49,6 +49,14 @@ export class Transaction {
       this.inputs[0].unlockScript === kCoinbaseUnlockScript
     );
   }
+
+  /**
+   * 获取交易输出引用
+   *
+   */
+  getOutput(outputIndex: number) {
+    return this.outputs[outputIndex];
+  }
 }
 
 export class Input {
@@ -68,11 +76,11 @@ export class Input {
      */
     public reference?: {
       /**
-       * 这笔UTXO所在交易的hash
+       * UTXO所在交易的hash
        */
       transactionHash: string;
       /**
-       * 这笔UTXO在所在交易的 outputs 中的索引
+       * UTXO在所在交易的 outputs 中的索引
        */
       outputIndex: number;
     },
@@ -80,7 +88,7 @@ export class Input {
 
   get hashUTXO(): HashUTXO {
     return this.reference === undefined
-      ? 'coinbase_404'
+      ? (kCoinbaseInputHash as any)
       : `${this.reference.transactionHash}_${this.reference.outputIndex}`;
   }
 }
