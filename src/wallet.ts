@@ -1,6 +1,11 @@
 import { blockChain } from './blockchain';
-import { Output } from './transaction';
-import { createKeyPair } from './utils';
+import { Input, Output, Transaction } from './transaction';
+import { createKeyPair, createSignature, printf, verifySignature } from './utils';
+
+interface Billing {
+  type: 'income' | 'expenditure';
+  transaction: Transaction;
+}
 
 export class Wallet {
   constructor(public publicKey?: string, public privateKey?: string) {
@@ -29,14 +34,60 @@ export class Wallet {
   /**
    * 查询收支账单
    */
-  static getBilling(publicKey: string) {
-    // todo
+  static getBilling(wallet: Wallet): Billing[] {
+    const { privateKey, publicKey } = wallet;
+    const billing: Billing[] = [];
+    for (const [_, transaction] of Object.entries(
+      blockChain.confirmedDataManager.confirmedTransactions,
+    )) {
+      const isExpenditure = transaction.inputs.some((input) =>
+        verifySignature(privateKey!, input.unlockScript),
+      );
+      if (isExpenditure) {
+        // 支出
+        billing.push({ type: 'expenditure', transaction: transaction });
+        continue;
+      }
+      const isIncome = transaction.outputs.some((output) => publicKey === output.lockScript);
+      if (isIncome) {
+        // 收入
+        billing.push({ type: 'income', transaction: transaction });
+      }
+    }
+    return billing;
   }
 
   /**
    * 支付/转账
    */
-  sendMoney(value: bigint, receiverPublicKey: string) {
-    // todo 创建交易，广播到网络
+  sendMoney(value: bigint, receiverPublicKey: string): boolean {
+    const isMineUTXO = (utxo: Output) => this.publicKey === utxo.lockScript;
+    let balance = 0n;
+    const inputs: Input[] = [];
+    // 遍历当前区块链上有效的UTXOs
+    for (const [hash, utxo] of Object.entries(blockChain.utxoManager.UTXOs)) {
+      if (isMineUTXO(utxo)) {
+        balance += utxo.value;
+        const reference = {
+          transactionHash: hash.split('_')[0],
+          outputIndex: parseInt(hash.split('_')[1], 10),
+        };
+        inputs.push(new Input(createSignature(this.privateKey!, hash), reference));
+        if (balance >= value) break;
+      }
+    }
+    if (balance < value) {
+      printf(`>>> 转账至${receiverPublicKey}余额不足，所需${value}，余额${balance}`);
+      return false;
+    }
+    const outputs =
+      balance === value
+        ? [new Output(value, receiverPublicKey)]
+        : [new Output(value, receiverPublicKey), new Output(balance - value, receiverPublicKey)];
+    // 创建交易
+    const transaction = new Transaction(inputs, outputs);
+    // todo 广播到网络
+    printf(`>>> 转账至${receiverPublicKey}成功，等待确认`);
+    return true;
   }
 }

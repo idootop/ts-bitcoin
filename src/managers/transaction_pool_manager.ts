@@ -5,7 +5,6 @@ import { Transaction } from '../transaction';
 import { Hash } from '../utils';
 import { validateTransaction } from '../validate';
 
-// todo 节点间中继消息时，不要重复接收已存在的交易或区块，即一个消息只处理一次
 export class TransactionPoolManager extends BlockManager {
   /**
    * 合法交易

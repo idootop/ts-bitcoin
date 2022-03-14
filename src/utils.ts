@@ -72,10 +72,12 @@ export const createKeyPair = () =>
 
 /**
  * 创建签名
+ *
+ * @utxoHash 所花费 UTXO 的 hash
  */
-export const createSignature = (privateKey: string, data: string) => {
+export const createSignature = (privateKey: string, utxoHash: string) => {
   const sign = crypto.createSign('RSA-SHA256');
-  sign.update(data).end();
+  sign.update(utxoHash).end();
   return sign.sign(privateKey, 'hex');
 };
 
@@ -88,3 +90,17 @@ export const verifySignature = (publicKey: string, signature: string) => {
 };
 
 export const deepClone = (data: any) => JSON.parse(JSON.stringify(data));
+
+export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+
+export const uuid = (): UUID => {
+  const s: any = [];
+  const hexDigits = '0123456789abcdef';
+  for (let i = 0; i < 36; i++) {
+    s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+  }
+  s[14] = '4';
+  s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
+  s[8] = s[13] = s[18] = s[23] = '-';
+  return s.join('');
+};
