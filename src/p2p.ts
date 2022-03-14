@@ -1,46 +1,10 @@
-import { Block } from './block';
-import { blockChain } from './blockchain';
-import { Transaction } from './transaction';
-import { Hash, hashObj, printf, UUID } from './utils';
-
-interface Msg {
-  /**
-   * 命令
-   */
-  command: string;
-  /**
-   * 数据或uuid（command msg）
-   */
-  data: any;
-  /**
-   * command 消息的附加数据
-   */
-  extra: any;
-}
-
-interface BlockMsg extends Msg {
-  command: 'Block';
-  data: Block;
-}
-
-interface TransactionMsg extends Msg {
-  command: 'Transaction';
-  data: Transaction;
-}
-
-interface CommandMsg<T extends string> extends Msg {
-  command: T;
-  data: UUID;
-}
-
-type KnownMsgs = BlockMsg | TransactionMsg | CommandMsg<'getBlocks'>;
-
-/**
- * 已知命令
- */
-const knownCommands = ['Block', 'Transaction'];
+import { Msg, processMsg } from './msg';
+import { Hash, hashObj, uuid } from './utils';
 
 class P2P {
+  constructor(public address = uuid()) {
+    this.fetchNodes();
+  }
   /**
    * 已知消息（收到的区块或交易消息广播）
    *
@@ -50,35 +14,59 @@ class P2P {
    */
   knownMsgs: Hash[] = [];
 
+  /**
+   * 已知节点
+   */
+  nodes: string[] = [];
+
+  /**
+   * 查询节点
+   */
+  async fetchNodes() {
+    // todo
+  }
+
+  /**
+   * 向指定节点发送消息
+   *
+   * todo 检查节点是否联通正常，节点下线时应从nodes列表中移除
+   */
+  sendMsg2Node(msg: Msg, node: string) {
+    msg.sender = this.address;
+    // todo
+  }
+
+  /**
+   * 向每个节点发送消息
+   */
+  sendMsg(msg: Msg) {
+    this.nodes.forEach((node) => {
+      this.sendMsg2Node(msg, node);
+    });
+  }
+
+  /**
+   * 中继消息
+   */
+  relayMsg(msg: Msg) {
+    this.nodes.forEach((node) => {
+      if (node !== msg.sender) {
+        this.sendMsg2Node(msg, node);
+      }
+    });
+  }
+
   onReciveMsg(msg: any) {
-    const msgHash = hashObj(msg);
+    const msgHash = hashObj({ data: msg?.data });
     if (this.knownMsgs.includes(msgHash)) {
       // 同一消息只处理一次
       return;
     }
     this.knownMsgs.push(msgHash);
-    // todo 中继广播消息到网络其他节点
-    if (!knownCommands.includes(msg?.command) || msg.data == undefined) {
-      printf(`>>> 未知消息：${msg}`);
-      return;
-    }
-    this.processMsg(msg);
-  }
-
-  processMsg(msg: KnownMsgs) {
-    if (msg.command === 'Block') {
-      // 收到新区块
-      blockChain.addBlocksIfValid([
-        new Block(msg.data.preHash, msg.data.timestamp, msg.data.nonce, msg.data.transactions),
-      ]);
-    } else if (msg.command === 'Transaction') {
-      // 收到新交易
-      blockChain.transactionPoolManager.addTransaction(
-        new Transaction(msg.data.inputs, msg.data.outputs),
-      );
-    } else {
-      printf(`>>> 未处理的消息：${msg}`);
-    }
+    // 中继广播消息到网络其他节点
+    this.relayMsg(msg);
+    // 处理对应类型的消息
+    processMsg(msg);
   }
 }
 
