@@ -1,7 +1,7 @@
+import { kGenesisBlock } from '../config';
+import { Hash } from '../utils';
 import { Block } from './block';
-import { kGenesisBlock } from './config';
 import { ConfirmedDataManager, TransactionPoolManager, UTXOManager } from './managers';
-import { Hash } from './utils';
 import { validateBlock, validateContinuousBlocks, validatePoW } from './validate';
 
 export class BlockChain {

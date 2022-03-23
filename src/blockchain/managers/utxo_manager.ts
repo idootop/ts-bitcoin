@@ -1,9 +1,9 @@
-import { Block } from '../block';
-import { BlockManager } from '../block';
+import { Block } from '../../block';
+import { BlockManager } from '../../block';
+import { kCoinbaseInputHash } from '../../config';
+import { Output, Transaction } from '../../transaction';
+import { HashUTXO } from '../../utils';
 import { blockChain } from '../blockchain';
-import { kCoinbaseInputHash } from '../config';
-import { Output, Transaction } from '../transaction';
-import { HashUTXO } from '../utils';
 
 export class UTXOManager extends BlockManager {
   /**

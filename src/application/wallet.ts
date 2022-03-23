@@ -1,6 +1,7 @@
-import { blockChain } from './blockchain';
-import { Input, Output, Transaction } from './transaction';
-import { createKeyPair, createSignature, printf, verifySignature } from './utils';
+import { blockChain } from '../blockchain/blockchain';
+import { Input, Output, Transaction } from '../blockchain/transaction';
+import { p2p } from '../network/p2p';
+import { createKeyPair, createSignature, printf, verifySignature } from '../utils';
 
 interface Billing {
   type: 'income' | 'expenditure';
@@ -40,7 +41,7 @@ export class Wallet {
     for (const [_, transaction] of Object.entries(
       blockChain.confirmedDataManager.confirmedTransactions,
     )) {
-      const isExpenditure = transaction.inputs.some((input) =>
+      const isExpenditure = transaction.inputs.some((input: any) =>
         verifySignature(privateKey!, input.unlockScript),
       );
       if (isExpenditure) {
@@ -48,7 +49,7 @@ export class Wallet {
         billing.push({ type: 'expenditure', transaction: transaction });
         continue;
       }
-      const isIncome = transaction.outputs.some((output) => publicKey === output.lockScript);
+      const isIncome = transaction.outputs.some((output: any) => publicKey === output.lockScript);
       if (isIncome) {
         // 收入
         billing.push({ type: 'income', transaction: transaction });
@@ -77,7 +78,7 @@ export class Wallet {
       }
     }
     if (balance < value) {
-      printf(`>>> 转账至${receiverPublicKey}余额不足，所需${value}，余额${balance}`);
+      printf(`>>> 转账至${receiverPublicKey}：余额不足，所需${value}，余额${balance}`);
       return false;
     }
     const outputs =
@@ -86,8 +87,9 @@ export class Wallet {
         : [new Output(value, receiverPublicKey), new Output(balance - value, receiverPublicKey)];
     // 创建交易
     const transaction = new Transaction(inputs, outputs);
-    // todo 广播到网络
-    printf(`>>> 转账至${receiverPublicKey}成功，等待确认`);
+    // 广播到网络
+    p2p.brodcastTransationMsg(transaction);
+    printf(`>>> 转账至${receiverPublicKey}：交易已创建，等待确认`);
     return true;
   }
 }

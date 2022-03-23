@@ -1,6 +1,6 @@
-import { kDifficultySteps } from './config';
+import { kDifficultySteps } from '../config';
+import { Hash, hashObj, now } from '../utils';
 import { Transaction } from './transaction';
-import { Hash, hashObj, now } from './utils';
 
 export class Block {
   constructor(

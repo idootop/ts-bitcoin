@@ -1,5 +1,5 @@
-import { Block } from './block';
-import { Transaction } from './transaction';
+import { Block } from '../blockchain/block';
+import { Transaction } from '../blockchain/transaction';
 
 /**
  * 总币数：100万

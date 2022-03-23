@@ -1,13 +1,13 @@
-import { Block, calcBlockDifficulty } from './block';
-import { blockChain } from './blockchain';
 import {
   kCoinbaseReward,
   kGenesisBlock,
   kMaxTransactionsPerBlock,
   kMinFeesPerTransaction,
-} from './config';
+} from '../config';
+import { deepClone, HashUTXO, verifySignature } from '../utils';
+import { Block, calcBlockDifficulty } from './block';
+import { blockChain } from './blockchain';
 import { Input, Transaction } from './transaction';
-import { deepClone, HashUTXO, verifySignature } from './utils';
 
 type TransactionType = 'valid' | 'invalid' | 'orphan';
 

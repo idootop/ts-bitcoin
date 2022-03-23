@@ -1,5 +1,5 @@
-import { kCoinbaseInputHash, kCoinbaseUnlockScript } from './config';
-import { hashObj, HashUTXO } from './utils';
+import { kCoinbaseInputHash, kCoinbaseUnlockScript } from '../config';
+import { hashObj, HashUTXO } from '../utils';
 
 export class Transaction {
   constructor(
