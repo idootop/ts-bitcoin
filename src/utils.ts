@@ -37,7 +37,9 @@ export const removeWhere = <T>(
  */
 export const jsonEncode = (obj: any, prettier = false) => {
   try {
-    return prettier ? JSON.stringify(obj, undefined, 4) : JSON.stringify(obj);
+    return prettier
+      ? JSON.stringify(obj, (_, value) => (typeof value === 'bigint' ? value.toString() : value), 4)
+      : JSON.stringify(obj, (_, value) => (typeof value === 'bigint' ? value.toString() : value));
   } catch (error) {
     return '';
   }
@@ -89,7 +91,7 @@ export const verifySignature = (publicKey: string, signature: string) => {
   return verify.verify(publicKey, Buffer.from(signature, 'hex'));
 };
 
-export const deepClone = (data: any) => JSON.parse(JSON.stringify(data));
+export const deepClone = (data: any) => JSON.parse(jsonEncode(data));
 
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 

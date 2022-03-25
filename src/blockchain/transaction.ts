@@ -1,5 +1,5 @@
 import { kCoinbaseInputHash, kCoinbaseUnlockScript } from '../config';
-import { hashObj, HashUTXO } from '../utils';
+import { hashObj, HashUTXO, printf, uuid } from '../utils';
 
 export class Transaction {
   constructor(
@@ -26,7 +26,7 @@ export class Transaction {
    */
   static coinbase(reward: bigint, fees: bigint, lockScript: string) {
     return new Transaction(
-      [new Input(kCoinbaseUnlockScript)],
+      [new Input(kCoinbaseUnlockScript + uuid())],
       [new Output(reward + fees, lockScript)],
     );
   }
@@ -46,7 +46,7 @@ export class Transaction {
       this.inputs.length === 1 &&
       this.outputs.length === 1 &&
       this.inputs[0].reference === undefined &&
-      this.inputs[0].unlockScript === kCoinbaseUnlockScript
+      this.inputs[0].unlockScript.startsWith(kCoinbaseUnlockScript)
     );
   }
 

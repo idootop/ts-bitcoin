@@ -12,6 +12,39 @@ import { Input, Transaction } from './transaction';
 type TransactionType = 'valid' | 'invalid' | 'orphan';
 
 /**
+ * 获取交易的手续费
+ */
+export const getTransactionFees = (transaction: Transaction) => {
+  let inputTotal = 0n;
+  let outputTotal = 0n;
+  for (const input of transaction.inputs) {
+    const utxo = blockChain.utxoManager.getUTXO(input.hashUTXO);
+    if (utxo === undefined) {
+      // 找不到引用，可能为孤儿交易
+      return 0n;
+    }
+    const publicKey = utxo.lockScript;
+    const signature = input.unlockScript;
+    // 无效的签名
+    if (!verifySignature(publicKey, signature)) {
+      return 0n;
+    }
+    inputTotal += utxo.value;
+  }
+
+  for (const output of transaction.outputs) {
+    outputTotal += output.value;
+  }
+
+  if (outputTotal > inputTotal) {
+    // 输出不能大于输入
+    return 0n;
+  }
+
+  return inputTotal - outputTotal;
+};
+
+/**
  * 校验交易是否有效，或为孤儿交易
  *
  * 需满足：
@@ -145,7 +178,7 @@ export const validateBlockTransactions = (originTransactions: Transaction[]) => 
       tempUTXOs[hashUTXO] = output;
     });
   }
-
+  // todo 动态变更奖励值，一定高度时减半
   if (coinbase.outputs[0].value > feesTotal + kCoinbaseReward) {
     // coinbase 的输出值不能大于奖励 + 手续费
     return false;

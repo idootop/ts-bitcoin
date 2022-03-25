@@ -1,15 +1,14 @@
 import { kGenesisBlock } from '../config';
-import { Hash } from '../utils';
+import { Hash, printf } from '../utils';
 import { Block } from './block';
 import { ConfirmedDataManager, TransactionPoolManager, UTXOManager } from './managers';
 import { validateBlock, validateContinuousBlocks, validatePoW } from './validate';
 
+// todo 数据本地持久化
 export class BlockChain {
-  constructor() {
-    // 初始化区块链状态
-    // todo 数据本地持久化
+  async init() {
     this.addBlocksIfValid([kGenesisBlock]);
-    // todo 在接收新的交易与区块前，先从附近节点同步主链数据
+    // todo 读取本地数据，初始化区块链状态
   }
 
   /**
@@ -75,8 +74,12 @@ export class BlockChain {
     const preHash = blocks[0].preHash;
     const preBlockIndex = chain.indexOf(preHash);
     if (preBlockIndex < 0) {
-      // 未找到新区块的 preBlock，丢掉更新
-      return;
+      if (blocks[0].hash === kGenesisBlock.hash) {
+        // 创世区块
+      } else {
+        // 未找到新区块的 preBlock，丢掉更新
+        return;
+      }
     }
 
     if (blocks.some((block, idx) => !validatePoW(block, idx + 1 + preBlockIndex + 1))) {

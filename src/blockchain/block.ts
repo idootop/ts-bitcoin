@@ -46,5 +46,5 @@ export abstract class BlockManager {
  */
 export const calcBlockDifficulty = (height: number) => {
   // 每 kDifficultySteps 个区块，难度 +1
-  return Math.floor((height - 1) / kDifficultySteps);
+  return height === 1 ? 0 : Math.floor((height - 1) / kDifficultySteps) + 4;
 };

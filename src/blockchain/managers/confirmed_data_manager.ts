@@ -1,8 +1,8 @@
-import { Block } from '../../block';
-import { BlockManager } from '../../block';
-import { Transaction } from '../../transaction';
 import { Hash, removeWhere } from '../../utils';
+import { Block } from '../block';
+import { BlockManager } from '../block';
 import { blockChain } from '../blockchain';
+import { Transaction } from '../transaction';
 
 export class ConfirmedDataManager extends BlockManager {
   /**

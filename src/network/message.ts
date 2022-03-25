@@ -15,11 +15,11 @@ export interface Msg {
   /**
    * command 消息的附加数据
    */
-  extra: any;
+  extra?: any;
   /**
    * 发消息者地址uuid
    */
-  sender: string;
+  sender?: string;
 }
 
 interface BlockMsg extends Msg {

@@ -5,8 +5,13 @@ import { Msg, processRecivedMsg } from './message';
 import { P2PNode } from './node';
 
 class P2P {
-  constructor(public address = uuid()) {
+  constructor(public address = uuid()) {}
+
+  async init() {
     this.fetchNodes();
+    // todo 连接节点
+    // todo 同步主链数据
+    // todo 初始化完毕，开始接收并处理区块，交易消息广播
   }
 
   /**
@@ -27,7 +32,6 @@ class P2P {
    * 广播区块消息
    */
   brodcastBlockMsg = (block: Block) => {
-    // todo 当本地在线节点列表为空时，添加消息至发送队列，当连接节点数量超过安全值后，再按顺序广播暂存的消息。
     this.nodes.forEach((node) => {
       node.sendBlockMsg(block);
     });
@@ -37,7 +41,6 @@ class P2P {
    * 广播交易消息
    */
   brodcastTransationMsg = (transaction: Transaction) => {
-    // todo 当本地在线节点列表为空时，添加消息至发送队列，当连接节点数量超过安全值后，再按顺序广播暂存的消息。
     this.nodes.forEach((node) => {
       node.sendTransationMsg(transaction);
     });

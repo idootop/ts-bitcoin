@@ -5,8 +5,7 @@
   "description": "A simple Typescript implementation of Blockchain.",
   "scripts": {
     "prepare": "husky install",
-    "commit": "git add --all && cz && git push",
-    "changelog": "npx ts-node scripts/changelog.ts"
+    "commit": "git add --all && cz && git push"
   },
   "devDependencies": {
     "@types/conventional-changelog-core": "^4.2.1",

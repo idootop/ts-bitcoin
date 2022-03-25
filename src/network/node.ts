@@ -8,6 +8,8 @@ export class P2PNode {
 
   /**
    * 向当前节点发送消息
+   *
+   * todo 当本地在线节点列表为空时，添加消息至发送队列，当连接节点数量超过安全值后，再按顺序广播暂存的消息。
    */
   sendMsg = (msg: Msg) => {
     msg.sender = p2p.address;
@@ -23,13 +25,19 @@ export class P2PNode {
    * 向当前节点发送区块消息
    */
   sendBlockMsg = (block: Block) => {
-    // todo
+    this.sendMsg({
+      command: 'Block',
+      data: block,
+    });
   };
 
   /**
    * 向当前节点发送交易消息
    */
   sendTransationMsg = (transaction: Transaction) => {
-    // todo
+    this.sendMsg({
+      command: 'Transation',
+      data: transaction,
+    });
   };
 }

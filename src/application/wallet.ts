@@ -18,10 +18,12 @@ export class Wallet {
   }
 
   /**
-   * 查询钱包余额
+   * 查询钱包余额（单位：cent）
+   *
+   * @publicKey 为空时，查询当前区块链总价值量
    */
-  static getBalance(publicKey: string) {
-    const isMineUTXO = (utxo: Output) => publicKey === utxo.lockScript;
+  static getBalance(publicKey?: string) {
+    const isMineUTXO = (utxo: Output) => publicKey === undefined || publicKey === utxo.lockScript;
     let balance = 0n;
     // 遍历当前区块链上有效的UTXOs
     for (const [_, utxo] of Object.entries(blockChain.utxoManager.UTXOs)) {

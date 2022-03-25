@@ -1,8 +1,8 @@
-import { Block } from '../../block';
-import { BlockManager } from '../../block';
-import { Transaction } from '../../transaction';
 import { Hash } from '../../utils';
+import { Block } from '../block';
+import { BlockManager } from '../block';
 import { blockChain } from '../blockchain';
+import { Transaction } from '../transaction';
 import { validateTransaction } from '../validate';
 
 export class TransactionPoolManager extends BlockManager {
