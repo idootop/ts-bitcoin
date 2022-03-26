@@ -33,7 +33,7 @@ class Miner {
           const balance = Wallet.getBalance();
           const myBalance = Wallet.getBalance(kMyWallet.publicKey);
           printf(
-            `>>> 🎉 恭喜你挖到了第${currentHeight}个区块，一共尝试了${times}次，区块链总价值：${balance}，我的钱包余额：${myBalance}`,
+            `>>> 🎉 恭喜你挖到了第${currentHeight}个区块，一共尝试了${times}次，当前区块链总价值：${balance}，我的钱包余额：${myBalance}`,
           );
           // 广播新区块
           p2p.brodcastBlockMsg(block);
